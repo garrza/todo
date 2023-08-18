@@ -1,10 +1,5 @@
 import todo from "./functions/todo";
+import initialize from "./functions/UI";
 
-const init = todo();
-
-init.initializeDefaultProject();
-
-console.log(init.getUserProjects());
-
-
+initialize();
 
