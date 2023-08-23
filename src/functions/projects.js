@@ -19,9 +19,9 @@ const generateProject = (name, description) => {
         name,
         description,
         id,
-        projectTasks,
         addTaskToProject,
-        deleteTaskFromProject
+        deleteTaskFromProject,
+        getProjectTasks: () => projectTasks
     };
 };
 

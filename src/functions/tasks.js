@@ -4,16 +4,17 @@ const generateTask = (name, description, date, priority) => {
     const id = `TSK#${generateID()}`;
     let status = false;
 
+    const toggleTaskStatus = (task) => {
+        task.status = !task.status;
+    };
+
+
     const editTask = (task, newName, newDescription, newDate, newPriority) => {
         task.name = newName;
         task.description = newDescription;
         task.date = newDate;
         task.priority = newPriority;
-    };
-
-    const toggleTaskStatus = (task) => {
-        task.status = !task.status;
-    };
+    }
 
     return {
         name,
@@ -22,8 +23,8 @@ const generateTask = (name, description, date, priority) => {
         priority,
         id,
         status,
-        editTask,
-        toggleTaskStatus
+        toggleTaskStatus,
+        editTask
     };
 };
 
