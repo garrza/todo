@@ -8,7 +8,6 @@ const generateTask = (name, description, date, priority) => {
         task.status = !task.status;
     };
 
-
     const editTask = (task, newName, newDescription, newDate, newPriority) => {
         task.name = newName;
         task.description = newDescription;

@@ -1,4 +1,7 @@
 import todo from './todo';
+import generateTask from "./tasks";
+import generateProject from './projects';
+
 
 const user = todo();
 user.initializeDefaultProject();
@@ -29,27 +32,96 @@ const createSidebar = () => {
     title.classList.add("aside-title")
     title.textContent = "Projects";
 
-    const projectsContainer = document.createElement("ul");
-    projectsContainer.classList.add("project-list");
+    const addProject = document.createElement("div");
+    addProject.classList.add("add-project");
+    addProject.textContent = "Add Project";
 
-    user.getUserProjects().forEach(project => {
-        const projectItem = document.createElement("li");
-        projectItem.textContent = project.name;
-        projectsContainer.appendChild(projectItem);
+    const projectsContainer = document.createElement("div");
+    projectsContainer.classList.add("project-container");
 
-        projectItem.addEventListener("click", () => {
-            console.log(project.getProjectTasks());
-            renderMain();
-            projectContent(project);
+    const projectList = document.createElement("ul");
+    projectList.classList.add("project-list");
+
+    addProject.addEventListener("click", () => {
+        const popupContainer = document.createElement("div");
+        popupContainer.className = "popup-container";
+
+        const popup = document.createElement("div");
+        popup.className = "popup";
+
+        const closeButton = document.createElement("span");
+        closeButton.className = "close-button";
+        closeButton.textContent = "x";
+        closeButton.addEventListener("click", () => {
+            popupContainer.remove();
         });
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Name:";
+        const nameInput = document.createElement("input");
+
+        const descriptionLabel = document.createElement("label");
+        descriptionLabel.textContent = "Description:";
+        const descriptionInput = document.createElement("input");
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Save Changes";
+        saveButton.addEventListener("click", () => {
+            if (nameInput.value === "" || descriptionInput.value === "") {
+                alert("Please fill all the fields");
+                return;
+            }
+            const newName = nameInput.value;
+            const newDescription = descriptionInput.value;
+
+            user.addProject(generateProject(newName, newDescription));
+
+            renderContent();
+            renderProjects();
+            popupContainer.remove();
+        });
+
+        popup.appendChild(closeButton);
+        popup.appendChild(nameLabel);
+        popup.appendChild(nameInput);
+        popup.appendChild(descriptionLabel);
+        popup.appendChild(descriptionInput);
+        popup.appendChild(saveButton);
+
+        popupContainer.appendChild(popup);
+
+        document.body.appendChild(popupContainer);
     });
 
+    projectsContainer.appendChild(projectList);
+
     aside.appendChild(title);
+    aside.appendChild(addProject);
     aside.appendChild(projectsContainer);
     return aside;
 }
 
+const renderProjects = () => {
+    const projectList = document.querySelector(".project-list");
+    projectList.textContent = "";
+    
+    user.getUserProjects().forEach(project => {
+        const projectItem = document.createElement("li");
+        projectItem.textContent = project.name;
+        projectList.appendChild(projectItem);
+
+        projectItem.addEventListener("click", () => {
+            console.log(project.getProjectTasks());
+            renderContent();
+            projectContent(project);
+        });
+    });
+}
+
 const openEditPopup = (task, project) => {
+    const popupContainer = document.createElement("div");
+    popupContainer.classList.add("popup-container");
+
     const popup = document.createElement("div");
     popup.className = "popup";
 
@@ -57,7 +129,7 @@ const openEditPopup = (task, project) => {
     closeButton.className = "close-button";
     closeButton.textContent = "x";
     closeButton.addEventListener("click", () => {
-        popup.remove();
+        popupContainer.remove();
     });
 
     const nameLabel = document.createElement("label");
@@ -84,6 +156,10 @@ const openEditPopup = (task, project) => {
     const saveButton = document.createElement("button");
     saveButton.textContent = "Save Changes";
     saveButton.addEventListener("click", () => {
+        if (nameInput.value === "" || descriptionInput.value === "" || dateInput.value === "" || priorityInput.value === "") {
+            alert("Please fill all the fields");
+            return;
+        }
         const newName = nameInput.value;
         const newDescription = descriptionInput.value;
         const newDate = dateInput.value;
@@ -91,9 +167,9 @@ const openEditPopup = (task, project) => {
 
         task.editTask(task, newName, newDescription, newDate, newPriority);
 
-        renderMain();
+        renderContent();
         projectContent(project);
-        popup.remove();
+        popupContainer.remove();
     });
 
     popup.appendChild(closeButton);
@@ -107,15 +183,16 @@ const openEditPopup = (task, project) => {
     popup.appendChild(priorityInput);
     popup.appendChild(saveButton);
 
-    document.body.appendChild(popup);
+    popupContainer.appendChild(popup);
+    document.body.appendChild(popupContainer);
 };
 
 const projectContent = (project) => {
-    const main = document.getElementById("main");
-
     const currentProject = document.createElement("div");
+    currentProject.classList.add("current-project");
 
-    const projectHeader = document.createElement("div");
+    const projectHeader = document.createElement("div")
+    projectHeader.classList.add("project-header");
 
     const projectName = document.createElement("h1");
     projectName.classList.add("project-name");
@@ -125,24 +202,130 @@ const projectContent = (project) => {
     projectDescription.classList.add("project-description");
     projectDescription.textContent = project.description;
 
+    const deleteProject = document.createElement("div");
+    deleteProject.classList.add("delete-project");
+    deleteProject.textContent = "Delete Project";
+
+    deleteProject.addEventListener("click", () => {
+        if(user.getUserProjects().length > 1) {
+        user.deleteProject(project);
+        renderContent();
+        renderProjects();
+        projectContent(user.getUserProjects()[0]);
+        } else {
+            alert("You can't delete the last project");
+        }
+    });
+
+    const projectAddTask = document.createElement("div");
+    projectAddTask.classList.add("project-add-task");
+    projectAddTask.textContent = "Add Task";
+
+    projectAddTask.addEventListener("click", () => {
+        const popupContainer = document.createElement("div");
+        popupContainer.className = "popup-container";
+
+        const popup = document.createElement("div");
+        popup.className = "popup";
+
+        const closeButton = document.createElement("span");
+        closeButton.className = "close-button";
+        closeButton.textContent = "x";
+        closeButton.addEventListener("click", () => {
+            popupContainer.remove();
+        });
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Name:";
+        const nameInput = document.createElement("input");
+
+        const descriptionLabel = document.createElement("label");
+        descriptionLabel.textContent = "Description:";
+        const descriptionInput = document.createElement("textarea");
+
+        const dateLabel = document.createElement("label");
+        dateLabel.textContent = "Date:";
+        const dateInput = document.createElement("input");
+        dateInput.type = "date";
+
+        const priorityLabel = document.createElement("label");
+        priorityLabel.textContent = "Priority:";
+
+        const priorityInput = document.createElement("form");
+        const priorities = ["Low", "Medium", "High"];
+
+        priorities.forEach(priority => {
+            const radioInput = document.createElement("input");
+            radioInput.type = "radio";
+            radioInput.name = "priority";
+            radioInput.value = priority.toLowerCase();
+            priorityInput.appendChild(radioInput);
+
+            const radioLabel = document.createElement("label");
+            radioLabel.textContent = priority;
+            priorityInput.appendChild(radioLabel);
+        });
+
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Save Changes";
+        saveButton.addEventListener("click", () => {
+            if (nameInput.value === "" || descriptionInput.value === "" || dateInput.value === "" || priorityInput.value === "") {
+                alert("Please fill all the fields");
+                return;
+            }
+            const newName = nameInput.value;
+            const newDescription = descriptionInput.value;
+            const newDate = dateInput.value;
+            const newPriority = priorityInput.value;
+            
+
+            const newTask = generateTask(newName, newDescription, newDate, newPriority);
+            project.addTaskToProject(newTask);
+
+            renderContent();
+            projectContent(project);
+            popupContainer.remove();
+        });
+
+        popup.appendChild(closeButton);
+        popup.appendChild(nameLabel);
+        popup.appendChild(nameInput);
+        popup.appendChild(descriptionLabel);
+        popup.appendChild(descriptionInput);
+        popup.appendChild(dateLabel);
+        popup.appendChild(dateInput);
+        popup.appendChild(priorityLabel);
+        popup.appendChild(priorityInput);
+        popup.appendChild(saveButton);
+
+        popupContainer.appendChild(popup);
+
+        document.body.appendChild(popupContainer);
+    });
+
     projectHeader.appendChild(projectName);
     projectHeader.appendChild(projectDescription);
+    projectHeader.appendChild(projectAddTask);
+    projectHeader.appendChild(deleteProject);
+
 
 
     const tasksContainer = document.createElement("div");
+    tasksContainer.classList.add("tasks-container");
 
     project.getProjectTasks().forEach(task => {
         const taskItem = document.createElement("div");
         const taskName = document.createElement("h2");
         const taskDescription = document.createElement("p");
         const taskDate = document.createElement("span");
-        const taskStatus = document.createElement("span");
+        const taskStatusToggle = document.createElement("div");
         const editButton = document.createElement("img");
 
         taskName.textContent = task.name;
         taskDescription.textContent = task.description;
         taskDate.textContent = task.date;
-        taskStatus.textContent = task.status ? "Completed" : "Not Completed";
+        taskStatusToggle.classList.add("task-status");;
         editButton.src = "assets/images/edit.png";
         editButton.alt = "Edit Task";
 
@@ -150,44 +333,41 @@ const projectContent = (project) => {
             openEditPopup(task, project);
         });
 
+        taskStatusToggle.addEventListener("click", () => {
+            task.status = !task.status;
+            project.deleteCompletedTasks();
+            renderContent();
+            projectContent(project);
+        });
+
         taskItem.appendChild(taskName);
         taskItem.appendChild(taskDescription);
         taskItem.appendChild(taskDate);
-        taskItem.appendChild(taskStatus);
         taskItem.appendChild(editButton);
-        
-        tasksContainer.appendChild(projectHeader);
+        taskItem.appendChild(taskStatusToggle);
+        taskItem.classList.add("task-item");
+
         tasksContainer.appendChild(taskItem);
     });
 
-    
+
+    currentProject.appendChild(projectHeader);
     currentProject.appendChild(tasksContainer);
 
-    main.appendChild(currentProject);
-}
-
-const createMain = () => {
-    const main = document.createElement("main");
-    main.classList.add("main");
-    main.setAttribute("id", "main");
-
-    return main;
-}
-
-const renderMain = () => {
-    const main = document.getElementById("main");
-    main.textContent = "";
+    content.appendChild(currentProject);
 }
 
 const createContent = () => {
     const content = document.createElement("div");
     content.classList.add("content");
+    content.setAttribute("id", "content");
 
-    content.appendChild(createSidebar());
-    content.appendChild(createMain());
-
-    
     return content;
+}
+
+const renderContent = () => {
+    const content = document.getElementById("content");
+    content.textContent = "";
 }
 
 const createFooter = () => {
@@ -212,13 +392,20 @@ const createFooter = () => {
     return footer;
 }
 
+const render = () => {
+    renderProjects();
+    projectContent(user.getUserProjects()[0]);
+}
 
 const initialize = () => {
     const body = document.querySelector("body");
 
     body.appendChild(createHeader());
+    body.appendChild(createSidebar());
     body.appendChild(createContent());
     body.appendChild(createFooter());
+
+    render();
 }
 
 

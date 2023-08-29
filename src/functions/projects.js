@@ -15,12 +15,26 @@ const generateProject = (name, description) => {
         }
     };
 
+    const deleteCompletedTasks = () => {
+        const completedTaskIndices = [];
+        projectTasks.forEach((task, index) => {
+            if (task.status === true) {
+                completedTaskIndices.push(index);
+            }
+        });
+
+        for (let i = completedTaskIndices.length - 1; i >= 0; i--) {
+            projectTasks.splice(completedTaskIndices[i], 1);
+        }
+    };
+
     return {
         name,
         description,
         id,
         addTaskToProject,
         deleteTaskFromProject,
+        deleteCompletedTasks,
         getProjectTasks: () => projectTasks
     };
 };
