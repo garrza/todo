@@ -168,7 +168,7 @@ body {
     font-size: .8rem;
     margin-top: 10px;
     cursor: pointer;
-    color: var(--main-color);
+    color: #F24C00;
     font-style: italic;
     background-color: white;
     padding: 5px;
@@ -177,6 +177,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.delete-project:hover{
+    background-color: #F24C00;
+    color: white;
 }
 
 .project-add-task:hover,
@@ -218,11 +223,27 @@ body {
     background-color: var(--main-color);
 }
 
-.main img {
-    width: 100%;
-    height: auto;
+.task-priority{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25px;
+    min-width: 25px;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
+.low-priority{
+    background-color: yellow;
+}
+
+.medium-priority{
+    background-color: orange;
+}
+
+.high-priority{
+    background-color: red;
+}
 
 /* --- --- --- --- --- FOOTER --- --- --- --- --- --- */
 
