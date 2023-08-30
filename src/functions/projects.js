@@ -8,13 +8,6 @@ const generateProject = (name, description) => {
         projectTasks.push(task);
     };
 
-    const deleteTaskFromProject = (taskId) => {
-        const taskIndex = projectTasks.findIndex(task => task.ID === taskId);
-        if (taskIndex !== -1) {
-            projectTasks.splice(taskIndex, 1);
-        }
-    };
-
     const deleteCompletedTasks = () => {
         const completedTaskIndices = [];
         projectTasks.forEach((task, index) => {
@@ -34,7 +27,6 @@ const generateProject = (name, description) => {
         id,
         projectTasks,
         addTaskToProject,
-        deleteTaskFromProject,
         deleteCompletedTasks,
     };
 };

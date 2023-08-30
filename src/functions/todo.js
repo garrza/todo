@@ -30,11 +30,11 @@ const todo = () => {
     
 
     return {
+        userProjects,
         initializeDefaultProject,
         addProject,
         deleteProject,
-        getProject,
-        userProjects
+        getProject
     };
 };
 
