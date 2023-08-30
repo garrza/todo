@@ -2,9 +2,7 @@ import todo from './todo';
 import generateTask from "./tasks";
 import generateProject from './projects';
 
-
 const user = todo();
-user.initializeDefaultProject();
 
 const createHeader = () => {
     const header = document.createElement("header");
@@ -75,9 +73,9 @@ const createSidebar = () => {
             const newDescription = descriptionInput.value;
 
             user.addProject(generateProject(newName, newDescription));
-
             renderContent();
             renderProjects();
+            localStorage.setItem('userProjects', JSON.stringify(user.userProjects));
             popupContainer.remove();
         });
 
@@ -104,14 +102,13 @@ const createSidebar = () => {
 const renderProjects = () => {
     const projectList = document.querySelector(".project-list");
     projectList.textContent = "";
-    
-    user.getUserProjects().forEach(project => {
+
+    user.userProjects.forEach(project => {
         const projectItem = document.createElement("li");
         projectItem.textContent = project.name;
         projectList.appendChild(projectItem);
 
         projectItem.addEventListener("click", () => {
-            console.log(project.getProjectTasks());
             renderContent();
             projectContent(project);
         });
@@ -166,9 +163,9 @@ const openEditPopup = (task, project) => {
         const newPriority = priorityInput.value;
 
         task.editTask(task, newName, newDescription, newDate, newPriority);
-
         renderContent();
         projectContent(project);
+        localStorage.setItem('userProjects', JSON.stringify(user.userProjects));
         popupContainer.remove();
     });
 
@@ -207,11 +204,12 @@ const projectContent = (project) => {
     deleteProject.textContent = "Delete Project";
 
     deleteProject.addEventListener("click", () => {
-        if(user.getUserProjects().length > 1) {
-        user.deleteProject(project);
-        renderContent();
-        renderProjects();
-        projectContent(user.getUserProjects()[0]);
+        if (user.userProjects.length > 1) {
+            user.deleteProject(project);
+            renderContent();
+            renderProjects();
+            projectContent(user.userProjects[0]);
+            localStorage.setItem('userProjects', JSON.stringify(user.userProjects));
         } else {
             alert("You can't delete the last project");
         }
@@ -251,21 +249,18 @@ const projectContent = (project) => {
         const priorityLabel = document.createElement("label");
         priorityLabel.textContent = "Priority:";
 
-        const priorityInput = document.createElement("form");
         const priorities = ["Low", "Medium", "High"];
 
+        const priorityInput = document.createElement("select");
+        priorityInput.name = "priority";
+        priorityInput.id = "priority";
+
         priorities.forEach(priority => {
-            const radioInput = document.createElement("input");
-            radioInput.type = "radio";
-            radioInput.name = "priority";
-            radioInput.value = priority.toLowerCase();
-            priorityInput.appendChild(radioInput);
-
-            const radioLabel = document.createElement("label");
-            radioLabel.textContent = priority;
-            priorityInput.appendChild(radioLabel);
+            const option = document.createElement("option");
+            option.value = priority.toLowerCase();
+            option.textContent = priority;
+            priorityInput.appendChild(option);
         });
-
 
         const saveButton = document.createElement("button");
         saveButton.textContent = "Save Changes";
@@ -278,13 +273,14 @@ const projectContent = (project) => {
             const newDescription = descriptionInput.value;
             const newDate = dateInput.value;
             const newPriority = priorityInput.value;
-            
+
 
             const newTask = generateTask(newName, newDescription, newDate, newPriority);
             project.addTaskToProject(newTask);
 
             renderContent();
             projectContent(project);
+            localStorage.setItem('userProjects', JSON.stringify(user.userProjects));
             popupContainer.remove();
         });
 
@@ -314,20 +310,31 @@ const projectContent = (project) => {
     const tasksContainer = document.createElement("div");
     tasksContainer.classList.add("tasks-container");
 
-    project.getProjectTasks().forEach(task => {
+    project.projectTasks.forEach(task => {
         const taskItem = document.createElement("div");
         const taskName = document.createElement("h2");
         const taskDescription = document.createElement("p");
         const taskDate = document.createElement("span");
+        const taskPriority = document.createElement("div");
         const taskStatusToggle = document.createElement("div");
         const editButton = document.createElement("img");
 
         taskName.textContent = task.name;
         taskDescription.textContent = task.description;
         taskDate.textContent = task.date;
+        taskPriority.textContent = "!";
+        taskPriority.classList.add("task-priority");
         taskStatusToggle.classList.add("task-status");;
         editButton.src = "assets/images/edit.png";
         editButton.alt = "Edit Task";
+
+        if (task.priority === "low") {
+            taskPriority.classList.add("low-priority");
+        } else if (task.priority === "medium") {
+            taskPriority.classList.add("medium-priority");
+        } else {
+            taskPriority.classList.add("high-priority");
+        }
 
         editButton.addEventListener("click", () => {
             openEditPopup(task, project);
@@ -338,11 +345,13 @@ const projectContent = (project) => {
             project.deleteCompletedTasks();
             renderContent();
             projectContent(project);
+            localStorage.setItem('userProjects', JSON.stringify(user.userProjects));
         });
 
         taskItem.appendChild(taskName);
         taskItem.appendChild(taskDescription);
         taskItem.appendChild(taskDate);
+        taskItem.appendChild(taskPriority);
         taskItem.appendChild(editButton);
         taskItem.appendChild(taskStatusToggle);
         taskItem.classList.add("task-item");
@@ -394,8 +403,8 @@ const createFooter = () => {
 
 const render = () => {
     renderProjects();
-    projectContent(user.getUserProjects()[0]);
-}
+    projectContent(user.userProjects[0]);
+};
 
 const initialize = () => {
     const body = document.querySelector("body");
@@ -405,8 +414,26 @@ const initialize = () => {
     body.appendChild(createContent());
     body.appendChild(createFooter());
 
+    
+    const savedProjects = JSON.parse(localStorage.getItem('userProjects'));
+
+    if (savedProjects) {
+        console.log(savedProjects);
+        savedProjects.forEach(savedProject => {
+            const newProject = generateProject(savedProject.name, savedProject.description);
+            savedProject.projectTasks.forEach(savedTask => {
+                const newTask = generateTask(savedTask.name, savedTask.description, savedTask.date, savedTask.priority);
+                newProject.addTaskToProject(newTask);
+            });
+            user.addProject(newProject);
+        });
+    } else {
+        user.initializeDefaultProject();
+    }
+
     render();
-}
+};
+
 
 
 export default initialize;

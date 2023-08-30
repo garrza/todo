@@ -32,10 +32,10 @@ const generateProject = (name, description) => {
         name,
         description,
         id,
+        projectTasks,
         addTaskToProject,
         deleteTaskFromProject,
         deleteCompletedTasks,
-        getProjectTasks: () => projectTasks
     };
 };
 

@@ -23,11 +23,18 @@ const todo = () => {
         addProject(defaultProject);
     };
 
+    const getProject = (projectId) => {
+        return userProjects.find(project => project.id === projectId);
+    };
+
+    
+
     return {
         initializeDefaultProject,
         addProject,
         deleteProject,
-        getUserProjects: () => userProjects
+        getProject,
+        userProjects
     };
 };
 
